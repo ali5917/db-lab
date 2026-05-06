@@ -1,8 +1,8 @@
 /*
 MongoDB Lab Practice – UniversityDB
 
-Q1: Setup database and collection 
-Q2: Insert initial data
+Q1: Create a database named UniversityDB and a collection named students
+Q2: Insert 5 sample student documents with nested grades
 Q3: Retrieve all students
 Q4: Retrieve students from Karachi
 Q5: Retrieve students where name = "Ali" OR age = 21
@@ -34,11 +34,11 @@ Q30: Drop Students collection
 Q31: Drop UniversityDB database
 */
 
-// Q1: Setup database and collection 
+// Q1: Create a database named UniversityDB and a collection named students
 use UniversityDB;
 db.createCollection("students");
 
-// Q2: Insert initial data
+// Q2: Insert 5 sample student documents with nested grades
 db.students.insertMany([
   { _id: 1, name: "Ali", age: 21, city: "Karachi", department: "CS", grades: { math: 88, science: 75 } },
   { _id: 2, name: "Sara", age: 22, city: "Lahore", department: "EE", grades: { math: 90, science: 85 } },
