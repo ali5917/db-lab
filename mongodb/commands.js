@@ -174,10 +174,10 @@ db.students.updateMany(
   { $set: { city: "Karachi" } }
 );
 
-// Increment a numeric field: age = age + 1
+// Increment a numeric field: age = age + 2
 db.students.updateOne(
   { name: "ali" },
-  { $inc: { age: 1 } }
+  { $inc: { age: 2 } }
 );
 
 // Add a new field to all documents.
@@ -197,8 +197,11 @@ db.students.updateMany(
 // DELETE COMMANDS
 // ------------------------------------------------------------------------
 
-// Deletes the first document where name is "ali".
-db.students.deleteOne({ name: "ali" });
+// Deletes the first student who is named "ali" AND lives in "Karachi"
+db.students.deleteOne({ 
+    name: "ali", 
+    city: "karachi" 
+});
 
 // findOneAndDelete: Deletes the first match and returns the deleted document.
 db.students.findOneAndDelete({ name: "sara" });
