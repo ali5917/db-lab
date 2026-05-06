@@ -60,9 +60,6 @@ END;
 -- 4. Label roles by department code: 90 is "Administration", 60 is "Technical Services", 
 -- others are "General Staff." Check for employee 115. Print the label.
 
--- 4. Label roles by department code: 90 is "Administration", 60 is "Technical Services", 
--- others are "General Staff." Check for employee 115. Print the label.
-
 SET SERVEROUTPUT ON;
 DECLARE
     deptID EMPLOYEES.DEPARTMENT_ID%TYPE;
@@ -84,7 +81,7 @@ BEGIN
 END;
 /
 
--- 6. Print the name and salary of every employee in department 50.
+-- 5. Print the name and salary of every employee in department 50.
 
 SET SERVEROUTPUT ON;
 BEGIN
@@ -99,7 +96,7 @@ BEGIN
 END;
 /
 
--- 7. Create a procedure that takes a worker's ID and displays their salary.
+-- 6. Create a procedure that takes a worker's ID and displays their salary.
 
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PROCEDURE printSal(
@@ -118,7 +115,7 @@ END;
 
 EXEC printSal(115);
 
--- 8. Create a procedure that takes a staff ID and returns their department code via an OUT parameter.
+-- 7. Create a procedure that takes a staff ID and returns their department code via an OUT parameter.
 
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PROCEDURE getDept(
@@ -141,7 +138,7 @@ BEGIN
 END;
 /
 
--- 9. Create a procedure that takes a number and increases it by 25% using an IN OUT parameter.
+-- 8. Create a procedure that takes a number and increases it by 25% using an IN OUT parameter.
 
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PROCEDURE incNum(
@@ -160,7 +157,7 @@ BEGIN
 END;
 /
 
--- 10. Design a solution that takes a street address and city, country, finds the next unique ID 
+-- 9. Design a solution that takes a street address and city, country, finds the next unique ID 
 -- (using COUNT), and inserts the new branch details.
 
 SET SERVEROUTPUT ON;
@@ -176,8 +173,8 @@ BEGIN
     INTO newID
     FROM LOCATIONS;
 
-    INSERT INTO LOCATIONS(LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, COUNTRY_ID
-    ) VALUES (newID, addr, 'N/A', city, NULL, cID);
+    INSERT INTO LOCATIONS (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, COUNTRY_ID) 
+    VALUES (newID, addr, 'N/A', city, NULL, cID);
 
     DBMS_OUTPUT.PUT_LINE('New branch:');
     DBMS_OUTPUT.PUT_LINE('Location ID : ' || newID);
@@ -188,3 +185,73 @@ END;
 /
 
 EXEC addBranch('Street 5, Shahrah-e-Faisal', 'Karachi', 'PK');
+
+-- 10. Create a procedure that displays total and average salary for each department.
+
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE totAvg
+IS
+BEGIN
+    FOR c IN (
+        SELECT SUM(SALARY) AS totalSal, AVG(SALARY) AS avgSal, DEPARTMENT_ID 
+        FROM EMPLOYEES
+        WHERE DEPARTMENT_ID IS NOT NULL
+        GROUP BY DEPARTMENT_ID
+    )
+    LOOP
+        DBMS_OUTPUT.PUT_LINE (
+            'Dept ID: '       || c.DEPARTMENT_ID  || 
+            ', Total: $'    || c.totalSal       ||
+            ', Average: $'  || c.avgSal
+        );
+    END LOOP;
+END;
+/
+
+-- 11. Identify employees hired on weekends (Sat/Sun) and log them into 'weekend_hires_log'.
+
+CREATE TABLE weekend_hires_log (
+    EMPLOYEE_ID  NUMBER,
+    FIRST_NAME   VARCHAR2(20)
+);
+
+SET SERVEROUTPUT ON;
+BEGIN
+    FOR c IN (
+        SELECT FIRST_NAME, EMPLOYEE_ID
+        FROM EMPLOYEES
+        WHERE TRIM(TO_CHAR(hire_date, 'Day')) IN ('Saturday', 'Sunday')    
+    )
+    LOOP
+        INSERT INTO weekend_hires_log (FIRST_NAME, EMPLOYEE_ID) 
+        VALUES (c.FIRST_NAME, c.EMPLOYEE_ID);
+    END LOOP;
+END;
+/
+
+-- 12. Create a procedure that removes duplicate employees (same first/last name), 
+-- keeping only one valid entry.
+
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE remDupl 
+IS
+    saveId EMPLOYEES.EMPLOYEE_ID%TYPE;
+BEGIN
+    FOR c IN (
+        SELECT FIRST_NAME, LAST_NAME, COUNT(EMPLOYEE_ID) 
+        FROM EMPLOYEES
+        GROUP BY FIRST_NAME, LAST_NAME
+        HAVING COUNT(EMPLOYEE_ID) > 1
+    )
+    LOOP 
+        SELECT MIN(EMPLOYEE_ID) 
+        INTO saveId
+        FROM EMPLOYEES
+        WHERE FIRST_NAME = c.FIRST_NAME AND LAST_NAME = c.LAST_NAME;
+
+        DELETE FROM EMPLOYEES
+        WHERE FIRST_NAME = c.FIRST_NAME AND LAST_NAME = c.LAST_NAME
+        AND EMPLOYEE_ID != saveId;
+    END LOOP;
+END;
+/
