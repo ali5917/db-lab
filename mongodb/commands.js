@@ -79,6 +79,9 @@ db.students.find({ city: { $ne: "karachi" } });
 // Filter: WHERE age > 20
 db.students.find({ age: { $gt: 20 } });
 
+// Logical NOT: WHERE age is NOT greater than 20
+db.students.find({ age: { $not: { $gt: 20 } } });
+
 // Filter: WHERE age >= 20 AND age <= 30
 db.students.find({ age: { $gte: 20, $lte: 30 } });
 
@@ -95,6 +98,7 @@ db.students.find({
 db.students.find({ name: /ali/i }); // case-insensitive contains "ali"
 db.students.find({ name: /^a/ });   // starts with "a"
 db.students.find({ name: /i$/ });   // ends with "i"
+db.students.find({ name: { $not: /^a/i } });                    // name does NOT start with "a"
 
 
 // SEARCH using $regex operator
@@ -110,6 +114,7 @@ db.students.createIndex({ name: "text", city: "text" });
 db.students.find({ $text: { $search: "ali" } });           // contains "ali" in any indexed field
 db.students.find({ $text: { $search: '"ali" "karachi"' } }); // contains both "ali" AND "karachi"
 db.students.find({ $text: { $search: "ali karachi" } });     // contains either "ali" OR "karachi"
+db.students.find({ $text: { $search: "ali -karachi" } });    // contains "ali" but EXCLUDES "karachi"
 
 
 // PROJECTION: SELECT name, city FROM students (show only name & city, hide _id)
@@ -155,6 +160,14 @@ db.students.updateOne(
   { $set: { city: "islamabad", age: 28 } }
 );
 
+// findOneAndUpdate: Updates one doc and returns the document.
+// By default it returns the OLD document. Use { returnDocument: "after" } for the NEW one.
+db.students.findOneAndUpdate(
+  { name: "ali" },
+  { $set: { age: 30 } },
+  { "returnNewDocument": true }
+);
+
 // Update ALL matching documents (updateMany).
 db.students.updateMany(
   { city: "karachi" },
@@ -186,6 +199,9 @@ db.students.updateMany(
 
 // Deletes the first document where name is "ali".
 db.students.deleteOne({ name: "ali" });
+
+// findOneAndDelete: Deletes the first match and returns the deleted document.
+db.students.findOneAndDelete({ name: "sara" });
 
 // Deletes ALL documents where city is "lahore".
 db.students.deleteMany({ city: "lahore" });
@@ -267,4 +283,18 @@ db.students.aggregate([
   { $group: { _id: "$city", count: { $sum: 1 } } },
   { $sort: { count: -1 } },
   { $limit: 3 }
+]);
+
+// SELECT city, COUNT(*) as total FROM students 
+// WHERE age > 18 
+// GROUP BY city 
+// HAVING total > 2 
+// ORDER BY total DESC
+// LIMIT 5;
+db.students.aggregate([
+  { $match: { age: { $gt: 18 } } },                 
+  { $group: { _id: "$city", total: { $sum: 1 } } },  
+  { $match: { total: { $gt: 2 } } },                
+  { $sort: { total: -1 } },
+  { $limit: 5 }                         
 ]);
