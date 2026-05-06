@@ -90,14 +90,27 @@ db.students.find({
   ]
 });
 
-// Pattern Match: WHERE name LIKE 'a%' (starts with 'a')
-db.students.find({ name: /^a/ });
 
-// Pattern Match: WHERE name LIKE '%ali%' (contains 'ali', case-insensitive)
-db.students.find({ name: /ali/i });
+// SEARCH without $regex operator
+db.students.find({ name: /ali/i }); // case-insensitive contains "ali"
+db.students.find({ name: /^a/ });   // starts with "a"
+db.students.find({ name: /i$/ });   // ends with "i"
 
-// Pattern Match: WHERE name LIKE '%i' (ends with 'i')
-db.students.find({ name: /i$/ });
+
+// SEARCH using $regex operator
+db.students.find({ name: { $regex: "ali", $options: "i" } });   // case‑insensitive contains "ali"
+db.students.find({ name: { $regex: "^ali", $options: "i" } });  // case‑insensitive starts with "ali" 
+db.students.find({ name: { $regex: "ali$", $options: "i" } });  // case‑insensitive ends with "ali"
+
+
+// TEXT SEARCH (requires a text index on the fields you want to search)
+db.students.createIndex({ name: "text", city: "text" });
+
+// searches all documents' fields
+db.students.find({ $text: { $search: "ali" } });           // contains "ali" in any indexed field
+db.students.find({ $text: { $search: '"ali" "karachi"' } }); // contains both "ali" AND "karachi"
+db.students.find({ $text: { $search: "ali karachi" } });     // contains either "ali" OR "karachi"
+
 
 // PROJECTION: SELECT name, city FROM students (show only name & city, hide _id)
 db.students.find({}, { name: 1, city: 1, _id: 0 });
