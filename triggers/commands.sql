@@ -72,10 +72,10 @@ END;
 -- AFTER DDL ON SCHEMA: Monitors the current user.
 -- AFTER DDL ON DATABASE: Monitors entire DB (Requires DBA privileges).
 
--- Attribute Functions:
 -- ora_sysevent -> Operation (CREATE, DROP, etc.)
 -- ora_dict_obj_type -> Object type (TABLE, INDEX, etc.)
 -- ora_dict_obj_name -> Object name
+-- sys_context('USERENV', 'CURRENT_USER') -> returns the currently logged in user
 
 CREATE OR REPLACE TRIGGER hr_audit_tr
 AFTER DDL ON SCHEMA

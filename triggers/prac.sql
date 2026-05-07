@@ -44,8 +44,8 @@ BEGIN
 END;
 /
 
--- 4.  Create a trigger that checks the new salary value being updated in the employees table. If the
---     new salary is greater than a threshold (say 10,000), display an error message to the user.
+-- 4.  Create a trigger that checks the new salary value being updated in the employees table. 
+-- If the new salary is greater than a threshold (say 10,000), display an error message.
 
 CREATE OR REPLACE TRIGGER tr3
 BEFORE UPDATE OF SALARY ON EMPLOYEES
